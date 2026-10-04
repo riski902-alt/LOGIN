@@ -381,123 +381,104 @@
         </div>
     </main>
 
-    <!-- JAVASCRIPT LOGIC -->
-    <script>
-        // Fungsi untuk Validasi Format Email
-        function isValidEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
-        }
-
-        // Fungsi Menangani Proses Form Login
-        function handleLogin(event) {
-            event.preventDefault(); 
-            
-            const emailInput = document.getElementById('email').value.trim();
-            const passwordInput = document.getElementById('password').value;
-            const statusDiv = document.getElementById('statusMessage');
-
-            statusDiv.style.display = 'none';
-            statusDiv.className = 'status-message';
-
-            if (emailInput === '' || passwordInput === '') {
-                showStatus('Email atau password belum diisi.', 'error');
-                return;
-            }
-
-            if (!isValidEmail(emailInput)) {
-                showStatus('Format email tidak valid.', 'error');
-                return;
-            }
-
-            // SIMULASI PROSES LOGIN
-            if (emailInput === 'siswa@smp.com' && passwordInput === '12345') {
-                showStatus('Login berhasil! Memuat halaman...', 'success');
-            } else {
-                showStatus('Email atau password salah.', 'error');
-            }
-        }
-
-        // Fungsi Menampilkan Pesan Status
-        function showStatus(message, type) {
-            const statusDiv = document.getElementById('statusMessage');
-            statusDiv.innerText = message;
-            
-            if (type === 'error') {
-                statusDiv.classList.add('status-error');
-            } else if (type === 'success') {
-                statusDiv.classList.add('status-success');
-            }
-            
-            statusDiv.style.display = 'block';
-        }
-
-        // Fungsi Toggle Tampilkan/Sembunyikan Password
-        function togglePassword() {
-            const passInput = document.getElementById('password');
-            const eyeIcon = document.getElementById('eyeIcon');
-            const btn = document.getElementById('togglePasswordBtn');
-
-            if (passInput.type === 'password') {
-                passInput.type = 'text';
-                btn.setAttribute('aria-label', 'Sembunyikan password');
-                eyeIcon.innerHTML = `
-                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                    <line x1="1" y1="1" x2="23" y2="23"></line>
-                `;
-            } else {
-                passInput.type = 'password';
-                btn.setAttribute('aria-label', 'Tampilkan password');
-                eyeIcon.innerHTML = `
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                `;
-            }
-        }
-    </script>
-    <script type="module">
+    <!-- JAVASCRIPT LOGIC & FIREBASE -->
+<script type="module">
+  // 1. Import Firebase
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBxy_aOtOcbDIzCKxxKxzcZgQSi4-YUT6g",
-  authDomain: "informatika-fun.firebaseapp.com",
-  projectId: "informatika-fun",
-  storageBucket: "informatika-fun.firebasestorage.app",
-  messagingSenderId: "869889926091",
-  appId: "1:869889926091:web:7d4d08db90802b8e26cc4e",
-  measurementId: "G-QRY003YPJ3"
-};
+  // 2. Konfigurasi Firebase Anda
+  const firebaseConfig = {
+    apiKey: "AIzaSyBxy_aOtOcbDIzCKxxKxzcZgQSi4-YUT6g",
+    authDomain: "informatika-fun.firebaseapp.com",
+    projectId: "informatika-fun",
+    storageBucket: "informatika-fun.firebasestorage.app",
+    messagingSenderId: "869889926091",
+    appId: "1:869889926091:web:7d4d08db90802b8e26cc4e"
+  };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-        // Menyalakan Firebase
+  // 3. Menyalakan Firebase
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
-  // (Ganti 'btnLogin', 'emailInput', dan 'passwordInput' sesuai ID di form HTML Anda)
-  document.getElementById('btnLogin').addEventListener('click', (event) => {
-    event.preventDefault(); 
-    const email = document.getElementById('emailInput').value;
-    const password = document.getElementById('passwordInput').value;
+  // --- FUNGSI BANTUAN (TAMPILAN) ---
+  function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
 
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        alert("Login Berhasil!");
-        window.location.href = "daftar-hadir.html"; // Arahkan ke halaman privat
-      })
-      .catch((error) => {
-        alert("Login Gagal! Cek email dan password.");
-      });
-  });
+  function showStatus(message, type) {
+    const statusDiv = document.getElementById('statusMessage');
+    if (!statusDiv) return; // Cegah error jika elemen tidak ada
+    
+    statusDiv.innerText = message;
+    statusDiv.style.display = 'block';
+    
+    if (type === 'error') {
+      statusDiv.classList.add('status-error');
+      statusDiv.classList.remove('status-success');
+    } else {
+      statusDiv.classList.add('status-success');
+      statusDiv.classList.remove('status-error');
+    }
+  }
+
+  // Membuat fungsi toggle password bisa diakses tombol HTML
+  window.togglePassword = function() {
+    const passInput = document.getElementById('password');
+    const eyeIcon = document.getElementById('eyeIcon');
+    
+    if (passInput.type === 'password') {
+      passInput.type = 'text';
+      if(eyeIcon) eyeIcon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
+    } else {
+      passInput.type = 'password';
+      if(eyeIcon) eyeIcon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
+    }
+  }
+
+  // --- PROSES LOGIN UTAMA (MENGGUNAKAN FIREBASE) ---
+  
+  // Pastikan tombol di HTML Anda memiliki id="btnLogin"
+  const btnLogin = document.getElementById('btnLogin');
+  
+  if (btnLogin) {
+    btnLogin.addEventListener('click', (event) => {
+      event.preventDefault(); 
+      
+      // Mengambil data dari form HTML (Pastikan input HTML Anda memiliki id="email" dan id="password")
+      const emailInput = document.getElementById('email').value.trim();
+      const passwordInput = document.getElementById('password').value;
+
+      // Cek apakah ada yang kosong
+      if (emailInput === '' || passwordInput === '') {
+        showStatus('Email atau password belum diisi.', 'error');
+        return;
+      }
+
+      // Cek format email
+      if (!isValidEmail(emailInput)) {
+        showStatus('Format email tidak valid.', 'error');
+        return;
+      }
+
+      // Menampilkan pesan loading saat menghubungi Firebase
+      showStatus('Memeriksa data...', 'success');
+
+      // Mengecek kecocokan ke database Firebase
+      signInWithEmailAndPassword(auth, emailInput, passwordInput)
+        .then((userCredential) => {
+          showStatus('Login berhasil! Mengalihkan halaman...', 'success');
+          // Jika berhasil, pindahkan ke halaman privat
+          window.location.href = "daftar-hadir.html"; 
+        })
+        .catch((error) => {
+          // Jika gagal (salah password/email tidak terdaftar)
+          showStatus('Login Gagal! Email atau password salah.', 'error');
+        });
+    });
+  }
 </script>
+    
 </body>
 </html>
